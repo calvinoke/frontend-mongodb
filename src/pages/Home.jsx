@@ -8,7 +8,7 @@ import Patient from "../components/Home/Dashboard/Patient.jsx";
 import SideBar from "../components/Home/UI/SideBar.jsx";
 import NavbarUser from "../components/Home/UI/NavbarUser.jsx";
 import Password from "../components/Home/Profile/Password.jsx";
-import axios from "../config/axiosConfig.jsx";
+import axiosInstance from "../config/axiosConfig.jsx";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ const Home = () => {
       navigate("/signin");
     } else {
       // check if the token is still valid
-      axios
+      axiosInstance
         .get("users/verifyToken", {
           headers: { "x-access-token": localStorage.getItem("token") },
         })

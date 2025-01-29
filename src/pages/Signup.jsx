@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
-import axios from "../config/axiosConfig.jsx";
+import axiosInstance from "../config/axiosConfig.jsx";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -49,7 +49,7 @@ const Signup = () => {
         formData.append("profilePhoto", profilePhoto);
       }
 
-      axios
+      axiosInstance
         .post("/users/signup", formData, {
           headers: {
             "Content-Type": "multipart/form-data",

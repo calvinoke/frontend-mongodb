@@ -1,7 +1,7 @@
 import Navbar from "../components/LandingPage/Navbar.jsx"; // Navigation bar component
 import { useFormik } from "formik"; // Form handling library
 import * as Yup from "yup"; // Schema validation library...
-import axios from "../config/axiosConfig.jsx"; // Pre-configured Axios instance for API calls
+import axiosInstance from "../config/axiosConfig.jsx"; // Pre-configured Axios instance for API calls
 import { toast, ToastContainer } from "react-toastify"; // Toast notifications for feedback
 import "react-toastify/dist/ReactToastify.css"; // Styles for toast notifications
 import { motion } from "framer-motion"; // Library for animations
@@ -30,7 +30,7 @@ const ResetPassword = () => {
       const token = window.location.pathname.split("/").pop();
 
       // API call to reset the password
-      axios
+      axiosInstance
         .post(`users/reset-password/${token}`, { newPassword })
         .then((response) => {
           // Show success notification

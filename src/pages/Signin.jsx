@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import axios from "../config/axiosConfig.jsx";
+import axiosInstance from "../config/axiosConfig.jsx";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -22,7 +22,7 @@ const Signin = () => {
       password: Yup.string().required("Password is required"),
     }),
     onSubmit: (values) => {
-      axios
+      axiosInstance
         .post("users/signin", values)
         .then((response) => {
           console.log(response.data);

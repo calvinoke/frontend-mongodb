@@ -1,7 +1,7 @@
 import Navbar from "../components/LandingPage/Navbar.jsx";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import axios from "../config/axiosConfig.jsx";
+import axiosInstance from "../config/axiosConfig.jsx";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { motion } from "framer-motion";
@@ -18,7 +18,7 @@ const ForgetPassword = () => {
       email: Yup.string().email("Invalid email address").required("Required"),
     }),
     onSubmit: (values) => {
-      axios
+      axiosInstance
         .post("users/forgetPassword", values)
         .then((response) => {
           toast.success("Email sent successfully");
