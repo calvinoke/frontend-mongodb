@@ -45,7 +45,7 @@ const Signin = () => {
   });
 
   if (localStorage.getItem("token")) {
-    axios
+    axiosInstance
       .get("users/verifyToken", {
         headers: { "x-access-token": localStorage.getItem("token") },
       })
