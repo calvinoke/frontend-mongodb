@@ -8,15 +8,14 @@ import "react-toastify/dist/ReactToastify.css";
 
 const Signup = () => {
   const navigate = useNavigate();
-  const [profilePhoto, setProfilePhoto] = useState(null);
 
   const validationSchema = Yup.object({
     firstName: Yup.string().required("First name is required"),
     lastName: Yup.string().required("Last name is required"),
     email: Yup.string().email("Invalid email").required("Email is required"),
-    phoneNumber: Yup.number("Invalid phone number").required(
-      "Phone number is required"
-    ),
+    phoneNumber: Yup.string()
+      .matches(/^[0-9]{10,15}$/, "Invalid phone number")
+      .required("Phone number is required"),
     username: Yup.string().required("Username is required"),
     specialty: Yup.string().required("Specialty is required"),
     password: Yup.string()
@@ -35,40 +34,23 @@ const Signup = () => {
       password: "",
     },
     validationSchema: validationSchema,
-    onSubmit: (values) => {
-      const formData = new FormData();
-      formData.append("firstName", values.firstName);
-      formData.append("lastName", values.lastName);
-      formData.append("email", values.email);
-      formData.append("phoneNumber", values.phoneNumber);
-      formData.append("username", values.username);
-      formData.append("specialty", values.specialty);
-      formData.append("password", values.password);
-
-      if (profilePhoto) {
-        formData.append("profilePhoto", profilePhoto);
+    onSubmit: async (values) => {
+      try {
+        const response = await axiosInstance.post("/users/signup", values);
+        const { accessToken, firstName, lastName, username, email, phoneNumber, specialty } = response.data;
+        
+        localStorage.setItem("token", accessToken);
+        localStorage.setItem("firstName", firstName);
+        localStorage.setItem("lastName", lastName);
+        localStorage.setItem("username", username);
+        localStorage.setItem("email", email);
+        localStorage.setItem("phoneNumber", phoneNumber);
+        localStorage.setItem("specialty", specialty);
+        
+        navigate("/signin", { replace: true });
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Something went wrong!");
       }
-
-      axiosInstance
-        .post("/users/signup", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then((response) => {
-          localStorage.setItem("token", response.data.accessToken);
-          localStorage.setItem("firstName", response.data.firstName);
-          localStorage.setItem("lastName", response.data.lastName);
-          localStorage.setItem("username", response.data.username);
-          localStorage.setItem("email", response.data.email);
-          localStorage.setItem("phoneNumber", response.data.phoneNumber);
-          localStorage.setItem("specialty", response.data.specialty);
-          localStorage.setItem("profilePhoto", response.data.profilePhoto);
-          navigate("/signin", { replace: true });
-        })
-        .catch((error) => {
-          toast.error(error.response?.data?.message || "Something went wrong!");
-        });
     },
   });
 
@@ -84,27 +66,12 @@ const Signup = () => {
     "other",
   ];
 
-  //event handler for handling photo change...
-  const handleProfilePhotoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
-      if (!allowedTypes.includes(file.type)) {
-        toast.error("Unsupported file type. Please upload a JPEG, PNG, or GIF image.");
-        return;
-      }
-      setProfilePhoto(file);
-    }
-  };
-
   return (
     <div className="h-screen w-screen flex relative">
       <ToastContainer />
       <div
         className="flex items-center gap-5 p-4 absolute cursor-pointer"
-        onClick={() => {
-          window.location.href = "/";
-        }}
+        onClick={() => navigate("/")}
       >
         <img src="icowhite.svg" className="w-1/3" alt="Health Management System logo" />
         <h1 className="text-3xl text-white font-racingSansOne">
@@ -116,15 +83,7 @@ const Signup = () => {
       </div>
       <div className="flex flex-col items-center justify-center w-11/12">
         <div className="rounded-xl w-[32rem]">
-          <h2 className="text-3xl font-semibold mb-5 text-center">
-            Welcome to
-          </h2>
-          <h2 className="text-3xl mb-5 text-center font-racingSansOne text-secondary">
-            Health Management System
-          </h2>
-          <h2 className="text-3xl font-semibold mb-5 text-center">
-            Create an Account
-          </h2>
+          <h2 className="text-3xl font-semibold mb-5 text-center">Create an Account</h2>
           <form onSubmit={formik.handleSubmit} className="flex flex-col gap-5">
             <div className="flex gap-10">
               <InputField formik={formik} name="firstName" label="First Name" />
@@ -134,9 +93,7 @@ const Signup = () => {
             <div className="flex gap-10">
               <InputField formik={formik} name="phoneNumber" label="Phone Number" />
               <div>
-                <label htmlFor="specialty" className="text-sm">
-                  Specialty
-                </label>
+                <label htmlFor="specialty" className="text-sm">Specialty</label>
                 <select
                   id="specialty"
                   name="specialty"
@@ -147,9 +104,7 @@ const Signup = () => {
                 >
                   <option value="" label="Select your specialty" />
                   {specialties.map((specialty) => (
-                    <option key={specialty} value={specialty}>
-                      {specialty}
-                    </option>
+                    <option key={specialty} value={specialty}>{specialty}</option>
                   ))}
                 </select>
               </div>
@@ -157,18 +112,6 @@ const Signup = () => {
             <div className="flex gap-10">
               <InputField formik={formik} name="username" label="Username" />
               <InputField formik={formik} name="password" label="Password" type="password" withToggle />
-            </div>
-            <div>
-              <label htmlFor="profilePhoto" className="text-sm">
-                Profile Photo
-              </label>
-              <input
-                type="file"
-                name="profilePhoto"
-                id="profilePhoto"
-                onChange={handleProfilePhotoChange}
-                className="mt-2 border border-gray-400 rounded-md p-2 w-full"
-              />
             </div>
             <button
               type="submit"
@@ -181,9 +124,7 @@ const Signup = () => {
             <p className="text-xm">
               Already have an account?
               <span
-                onClick={() => {
-                  window.location.href = "/signin";
-                }}
+                onClick={() => navigate("/signin")}
                 className="ml-3 font-semibold underline text-secondary transition duration-300 ease-in-out w-full cursor-pointer hover:text-secondary/80"
               >
                 Log in
@@ -201,9 +142,7 @@ const InputField = ({ formik, name, label, type = "text", withToggle = false }) 
 
   return (
     <div className="relative">
-      <label htmlFor={name} className="text-sm">
-        {label}
-      </label>
+      <label htmlFor={name} className="text-sm">{label}</label>
       <input
         type={withToggle ? (showPassword ? "text" : "password") : type}
         name={name}
@@ -218,7 +157,7 @@ const InputField = ({ formik, name, label, type = "text", withToggle = false }) 
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-2 top-8 text-gray-500"
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
         >
           {showPassword ? "🙈" : "👁️"}
         </button>

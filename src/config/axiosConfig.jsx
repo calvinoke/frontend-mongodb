@@ -3,12 +3,12 @@ import axios from "axios";
 const token = localStorage.getItem("token");
 
 const axiosInstance = axios.create({
-  baseURL: "https://hms-mongodb-i4y6.vercel.app",
+  baseURL:"https://hms-mongodb-x9kq.vercel.app", // ✅ Uses env variable for flexibility
   headers: {
-    "x-access-token": token,
+    ...(token && { "x-access-token": token }), // ✅ Only include token if it exists
     "Content-Type": "application/json",
   },
-  withCredentials: true, // ✅ Ensure this is set
+  withCredentials: true, // ✅ Allows cookies and auth credentials
 });
 
 export default axiosInstance;
